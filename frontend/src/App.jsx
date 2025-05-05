@@ -1,32 +1,43 @@
-import React, { useState } from 'react'
+import React, { useState, Suspense, lazy } from 'react'
 import Navbar from './components/Navbar/Navbar'
 import { Route, Routes } from 'react-router-dom'
-import Cart from './pages/Cart/Cart'
-import Home from './pages/Home/Home'
-import Placeorder from './pages/Placeorder/Placeorder'
 import Footer from './components/Footer/Footer'
 import LoginPopup from './components/LoginPopup/LoginPopup'
 
+// Lazy load components
+const Cart = lazy(() => import('./pages/Cart/Cart'))
+const Home = lazy(() => import('./pages/Home/Home'))
+const Placeorder = lazy(() => import('./pages/Placeorder/Placeorder'))
+const ChatBot = lazy(() => import('./components/ChatBot/ChatBot'))
+
+// Loading fallback component
+const LoadingSpinner = () => (
+  <div className="loading-spinner">
+    Loading...
+  </div>
+)
+
 const App = () => {
-
-  const [showLogin,setShowLogin] = useState(false)
-
+  const [showLogin, setShowLogin] = useState(false)
 
   return (
     <>
-    {showLogin?<LoginPopup setShowLogin={setShowLogin}/>:<></>}
+      {showLogin ? <LoginPopup setShowLogin={setShowLogin} /> : <></>}
       <div className='app'>
         <Navbar setShowLogin={setShowLogin} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path='/order' element={<Placeorder />} />
-        </Routes>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path='/order' element={<Placeorder />} />
+          </Routes>
+        </Suspense>
       </div>
       <Footer />
-
+      <Suspense fallback={<LoadingSpinner />}>
+        <ChatBot />
+      </Suspense>
     </>
-
   )
 }
 
